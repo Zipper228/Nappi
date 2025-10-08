@@ -1,11 +1,15 @@
-const { execSync } = require("child_process");
+const { spawn } = require("child_process");
 
-try {
-  execSync("npx tailwindcss -i src/input.css -o dist/output.css", {
-    stdio: "inherit",
-    shell: true,
-  });
-} catch (err) {
-  console.error("Tailwind build failed", err);
-  process.exit(1);
-}
+const cmd = process.platform === "win32" ? "npx.cmd" : "npx";
+const args = ["tailwindcss", "-i", "src/input.css", "-o", "dist/output.css"];
+
+const child = spawn(cmd, args, { stdio: "inherit" });
+
+child.on("close", (code) => {
+  if (code !== 0) {
+    console.error(`Tailwind build failed with exit code ${code}`);
+    process.exit(code);
+  } else {
+    console.log("Tailwind build succeeded!");
+  }
+});
